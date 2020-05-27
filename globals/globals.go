@@ -32,6 +32,8 @@ var DryRun *bool
 var StartTs *float64
 var LeanplumOutFilesPath *string
 var LeanplumAPIEndpoint *string
+var EventNames *string
+var EventFilter *string
 
 //var AutoConvert *bool
 
@@ -77,6 +79,8 @@ func Init() bool {
 	Type = flag.String("t", "profile", "The type of data, either profile, event, or both, defaults to profile")
 	Region = flag.String("r", "eu", "The account region, either eu, in, sk, or sg, defaults to eu")
 	DryRun = flag.Bool("dryrun", false, "Do a dry run, process records but do not upload")
+	EventNames = flag.String("eventNames", "", "The event or events that you wish to get data from mixpanel, encoded as a JSON array. Example format: '[\"play song\", \"log in\", \"add playlist\"]'")
+	EventFilter = flag.String("eventFilter", "", "An expression to filter events of mixpanel. See the expression section on the main data export API page.")
 	//AutoConvert = flag.Bool("autoConvert", false, "automatically covert property value type to number for number entries")
 	flag.Parse()
 	if (*JSONFilePath == "" && *CSVFilePath == "" && *MixpanelSecret == "" && MPEventsFilePaths == nil && *ImportService == "") || *AccountID == "" || (*AccountPasscode == "" && *ImportService != "leanplumToS3" && *ImportService != "leanplumToS3Throttled") {

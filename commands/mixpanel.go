@@ -28,7 +28,7 @@ import (
 
 const (
 	mixpanelProfilesExportEP = "https://mixpanel.com/api/2.0/engage/"
-	mixpanelEventsExportEP   = "https://data.mixpanel.com/api/2.0/export/"
+	mixpanelEventsExportEP   = "https://data.mixpanel.com/api/2.0/export/?"
 	maxPropsCount            = 255
 )
 
@@ -364,14 +364,24 @@ func mixpanelEventRecordsGenerator(done chan interface{}) <-chan apiUploadRecord
 		client := &http.Client{Timeout: time.Minute * 240}
 		eventsDate := *globals.StartDate
 		endDate := *globals.EndDate
+		eventNames := strings.ReplaceAll(*globals.EventNames, " ", "+")
+		filter := strings.ReplaceAll(*globals.EventFilter," ", "+")
+
 		if endDate == "" {
 			endDate = time.Now().Local().Format("2006-01-02")
 		}
-		log.Printf("Fetching events with start date: %v and end date: %v ", eventsDate, endDate)
+		endpoint := mixpanelEventsExportEP
+		if eventNames != "" {
+			endpoint = fmt.Sprintf(endpoint+"event=%s&", eventNames)
+		}
+		if filter != "" {
+			endpoint = fmt.Sprintf(endpoint+"where=%s&", filter)
+		}
+		log.Printf(   "Fetching events %s with start date: %v and end date: %v for filter %s", eventNames, eventsDate, endDate, filter)
 		encodedSecret := base64.StdEncoding.EncodeToString([]byte(*globals.MixpanelSecret))
 		for {
 			log.Printf("Fetching events data from Mixpanel for date: %v", eventsDate)
-			endpoint := fmt.Sprintf(mixpanelEventsExportEP+"?from_date=%v&to_date=%v", eventsDate, eventsDate)
+			endpoint = fmt.Sprintf(endpoint+"from_date=%v&to_date=%v", eventsDate, eventsDate)
 			req, err := http.NewRequest("GET", endpoint, nil)
 			if err != nil {
 				log.Fatal(err)
@@ -385,6 +395,10 @@ func mixpanelEventRecordsGenerator(done chan interface{}) <-chan apiUploadRecord
 			}
 			req.Header.Add("Authorization", "Basic "+encodedSecret)
 			resp, err := client.Do(req)
+			if resp != nil {
+				body, _ := ioutil.ReadAll(resp.Body)
+				log.Printf("response body: %s", string(body))
+			}
 			if err == nil && resp.StatusCode < 300 {
 				scanner := bufio.NewScanner(resp.Body)
 				scanner.Split(ScanCRLF)
