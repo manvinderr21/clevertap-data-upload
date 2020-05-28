@@ -381,8 +381,8 @@ func mixpanelEventRecordsGenerator(done chan interface{}) <-chan apiUploadRecord
 		encodedSecret := base64.StdEncoding.EncodeToString([]byte(*globals.MixpanelSecret))
 		for {
 			log.Printf("Fetching events data from Mixpanel for date: %v", eventsDate)
-			endpoint = fmt.Sprintf(endpoint+"from_date=%v&to_date=%v", eventsDate, eventsDate)
-			req, err := http.NewRequest("GET", endpoint, nil)
+			finalendpoint := fmt.Sprintf(endpoint+"from_date=%v&to_date=%v", eventsDate, eventsDate)
+			req, err := http.NewRequest("GET", finalendpoint, nil)
 			if err != nil {
 				log.Fatal(err)
 				select {
