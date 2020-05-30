@@ -23,7 +23,7 @@ import (
 
 	"os"
 
-	"github.com/ankit-arora/clevertap-data-upload/globals"
+	"github.com/manvinderr21/clevertap-data-upload/globals"
 )
 
 const (
@@ -135,7 +135,9 @@ func (p *mixpanelProfileRecordInfo) convertToCTAPIFormat() ([]interface{}, error
 					}
 					v = strings.Replace(v.(string), "@", "+"+identity+"@",1)
 				}
-
+				if k == "campaigns" || k == "mp_message_sends" || k == "mp_inapp_campaigns" {
+					continue
+				}
 				propertyData[k] = v
 				propsCount++
 			}

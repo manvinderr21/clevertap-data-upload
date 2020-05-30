@@ -15,7 +15,7 @@ import (
 
 	"encoding/csv"
 
-	"github.com/ankit-arora/clevertap-data-upload/globals"
+	"github.com/manvinderr21/clevertap-data-upload/globals"
 )
 
 const (
