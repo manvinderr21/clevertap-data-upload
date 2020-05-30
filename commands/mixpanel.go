@@ -129,8 +129,11 @@ func (p *mixpanelProfileRecordInfo) convertToCTAPIFormat() ([]interface{}, error
 				//Email
 				//Phone
 
-				if k == "Email" || k == "Date Of Birth" || k == "Phone" {
-					continue
+				if k == "Email" {
+					if strings.HasPrefix(v.(string), "+91") {
+						k = "Phone"
+					}
+					v = strings.Replace(v.(string), "@", "+"+identity+"@",1)
 				}
 
 				propertyData[k] = v
@@ -318,6 +321,9 @@ func (e *mixpanelEventRecordInfo) convertToCTAPIFormat() ([]interface{}, error) 
 		case reflect.Array:
 			isNested = true
 			break
+		case reflect.Map:
+			isNested = true
+			continue
 		default:
 		}
 		vTemp := ""
@@ -395,10 +401,6 @@ func mixpanelEventRecordsGenerator(done chan interface{}) <-chan apiUploadRecord
 			}
 			req.Header.Add("Authorization", "Basic "+encodedSecret)
 			resp, err := client.Do(req)
-			if resp != nil {
-				body, _ := ioutil.ReadAll(resp.Body)
-				log.Printf("response body: %s", string(body))
-			}
 			if err == nil && resp.StatusCode < 300 {
 				scanner := bufio.NewScanner(resp.Body)
 				scanner.Split(ScanCRLF)
